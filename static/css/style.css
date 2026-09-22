@@ -99,6 +99,10 @@ main.main-content {
     background-color: var(--navy) !important;
 }
 
+.kpi-icon.bg-warning {
+    background-color: var(--warning) !important;
+}
+
 .kpi-content {
     flex: 1;
 }
@@ -116,6 +120,34 @@ main.main-content {
     font-weight: 700;
     color: var(--navy);
     margin: 0;
+}
+
+/* Goal Card Specific */
+.goal-card .kpi-value {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.goal-progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.goal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--warning), #fd7e14);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.goal-percent {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
 }
 
 /* ==================== CHART CARDS ==================== */
@@ -209,9 +241,75 @@ main.main-content {
     height: 100%;
 }
 
+.book-card.horizontal {
+    flex-direction: row;
+}
+
 .book-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.book-card-cover {
+    width: 120px;
+    height: 160px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.book-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.book-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.book-cover-placeholder.bg-roman {
+    background: linear-gradient(135deg, #D67E7E 0%, #C86060 100%);
+}
+
+.book-cover-placeholder.bg-bilim {
+    background: linear-gradient(135deg, #6BA8D4 0%, #4A8BC2 100%);
+}
+
+.book-cover-placeholder.bg-kisisel-gelisim {
+    background: linear-gradient(135deg, #B89FBD 0%, #A67DAD 100%);
+}
+
+.book-cover-placeholder.bg-felsefe {
+    background: linear-gradient(135deg, #8FA67E 0%, #7A8B66 100%);
+}
+
+.book-cover-placeholder.bg-tarih {
+    background: linear-gradient(135deg, #C89D7C 0%, #B17A60 100%);
+}
+
+.book-cover-placeholder.bg-psikoloji {
+    background: linear-gradient(135deg, #7FA6D4 0%, #5A7FAA 100%);
+}
+
+.cover-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 .book-card-body {
@@ -489,6 +587,15 @@ main.main-content {
         font-size: 1.5rem;
     }
 
+    .book-card.horizontal {
+        flex-direction: column;
+    }
+
+    .book-card-cover {
+        width: 100%;
+        height: 200px;
+    }
+
     .book-card-body {
         padding: 1rem;
     }
@@ -556,6 +663,28 @@ main.main-content {
     .modal-dialog {
         margin: 1rem;
     }
+}
+
+/* ==================== NOTE MODAL & FORMS ==================== */
+.note-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.note-form textarea {
+    resize: vertical;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.note-form .btn-success {
+    align-self: flex-start;
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.note-form .btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
 }
 
 /* ==================== UTILITIES ==================== */

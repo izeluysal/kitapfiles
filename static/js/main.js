@@ -66,6 +66,11 @@ async function loadStats() {
         document.getElementById('totalReadPages').textContent = stats.total_read_pages;
         document.getElementById('booksReading').textContent = stats.books_reading;
         document.getElementById('completionPercent').textContent = stats.completion_percentage + '%';
+        
+        // Yearly goal
+        document.getElementById('yearlyGoalBooks').textContent = stats.books_finished + ' / ' + stats.yearly_goal;
+        document.getElementById('yearlyGoalPercent').textContent = stats.yearly_goal_percentage + '%';
+        document.getElementById('yearlyGoalBar').style.width = stats.yearly_goal_percentage + '%';
     } catch (error) {
         console.error('İstatistikler yüklenemedi:', error);
     }
@@ -123,7 +128,16 @@ function renderBooks(books) {
         const card = document.createElement('div');
         card.className = 'col-md-6 col-lg-4 mb-3';
         card.innerHTML = `
-            <div class="book-card" data-id="${book.id}">
+            <div class="book-card horizontal" data-id="${book.id}">
+                <div class="book-card-cover">
+                    ${book.cover_url 
+                        ? `<img src="${escapeHtml(book.cover_url)}" alt="${escapeHtml(book.title)}" class="book-cover-img">`
+                        : `<div class="book-cover-placeholder bg-${genreClass}">
+                             <i class="bi bi-book"></i>
+                             <div class="cover-text">${book.genre}</div>
+                           </div>`
+                    }
+                </div>
                 <div class="book-card-body">
                     <h5 class="book-title">${escapeHtml(book.title)}</h5>
                     <p class="book-author">${escapeHtml(book.author)}</p>
@@ -162,6 +176,9 @@ function renderBooks(books) {
                               </button>`
                         }
                         <div class="action-buttons-group">
+                            <button class="action-btn-icon notes" data-id="${book.id}" title="Notlar ve Alıntılar">
+                                <i class="bi bi-chat-left-text"></i>
+                            </button>
                             <button class="action-btn-icon edit" data-id="${book.id}" title="Düzenle">
                                 <i class="bi bi-pencil"></i>
                             </button>
@@ -176,10 +193,17 @@ function renderBooks(books) {
 
         container.appendChild(card);
 
+        // Create and append note modal
+        createNoteModal(book);
+
         // Attach event listeners
         const addPagesBtn = card.querySelector('.add-pages');
         if (addPagesBtn) {
             addPagesBtn.addEventListener('click', () => openAddPagesModal(book.id, book.read_pages, book.total_pages));
+        }
+        const notesBtn = card.querySelector('.notes');
+        if (notesBtn) {
+            notesBtn.addEventListener('click', () => openNoteModal(book.id));
         }
         card.querySelector('.edit').addEventListener('click', () => openEditModal(book.id));
         card.querySelector('.delete').addEventListener('click', () => openDeleteModal(book.id));
@@ -242,6 +266,7 @@ function openEditModal(bookId) {
     document.getElementById('read_pages').value = book.read_pages;
     document.getElementById('status').value = book.status;
     document.getElementById('rating').value = book.rating || '';
+    document.getElementById('cover_url').value = book.cover_url || '';
     document.getElementById('notes').value = book.notes || '';
     document.getElementById('noteChars').textContent = (book.notes || '').length;
 
@@ -283,6 +308,96 @@ function resetForm() {
     });
 }
 
+// ==================== NOTE MODAL ====================
+function createNoteModal(book) {
+    const modalHtml = `
+        <div class="modal fade" id="noteModal${book.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">${escapeHtml(book.title)}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <p class="text-muted small mb-3">${escapeHtml(book.author)} • <span class="badge bg-light text-dark border">${escapeHtml(book.genre)}</span></p>
+                        
+                        <!-- Current Notes Display -->
+                        ${book.notes 
+                            ? `<div class="alert alert-info border-start border-4 p-3 mb-3" role="alert" id="noteDisplay${book.id}">
+                                 <p class="mb-0" style="white-space: pre-line;">${escapeHtml(book.notes)}</p>
+                               </div>`
+                            : `<p class="text-muted fst-italic mb-3" id="noteDisplay${book.id}">Bu kitaba henüz bir not veya alıntı eklenmemiş.</p>`
+                        }
+                        
+                        <!-- Edit Form -->
+                        <h6 class="fw-semibold text-secondary small text-uppercase mb-2">Not Ekle/Düzenle</h6>
+                        <form id="noteForm${book.id}" class="note-form">
+                            <textarea class="form-control mb-2" id="noteTextarea${book.id}" name="notes" rows="4" placeholder="Kişisel not veya favori alıntı yazınız..." maxlength="1000">${book.notes || ''}</textarea>
+                            <small class="text-muted d-block mb-2"><span id="noteCounter${book.id}">${(book.notes || '').length}</span>/1000</small>
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Kaydet
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('noteModalContainer').insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function openNoteModal(bookId) {
+    const noteModal = new bootstrap.Modal(document.getElementById(`noteModal${bookId}`));
+    noteModal.show();
+    
+    // Attach form submit handler
+    const form = document.getElementById(`noteForm${bookId}`);
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await updateBookNotes(bookId);
+        });
+    }
+    
+    // Character counter
+    const textarea = document.getElementById(`noteTextarea${bookId}`);
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            document.getElementById(`noteCounter${bookId}`).textContent = this.value.length;
+        });
+    }
+}
+
+// ==================== NOTE MANAGEMENT ====================
+async function updateBookNotes(bookId) {
+    try {
+        const notes = document.getElementById(`noteTextarea${bookId}`).value.trim() || null;
+        
+        const response = await fetch(`/api/books/${bookId}/notes`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: notes })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            showToast(error.message || 'Not güncellenirken hata oluştu', false);
+            return;
+        }
+        
+        // Reload books to update modal
+        await loadBooks();
+        showToast('Not başarıyla güncellendi!', true);
+        
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById(`noteModal${bookId}`)).hide();
+    } catch (error) {
+        console.error('Not güncellemesi başarısız:', error);
+        showToast('Not güncellenirken hata oluştu', false);
+    }
+}
+
 // ==================== FORM SUBMISSION ====================
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -295,7 +410,8 @@ async function handleFormSubmit(e) {
         read_pages: parseInt(document.getElementById('read_pages').value) || 0,
         status: document.getElementById('status').value,
         rating: document.getElementById('rating').value ? parseInt(document.getElementById('rating').value) : null,
-        notes: document.getElementById('notes').value.trim() || null
+        notes: document.getElementById('notes').value.trim() || null,
+        cover_url: document.getElementById('cover_url').value.trim() || null
     };
 
     try {

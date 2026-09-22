@@ -14,6 +14,7 @@ class Book(db.Model):
     total_pages = db.Column(db.Integer, nullable=False)
     read_pages = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.String(20), nullable=False, default='Okunacak')
+    cover_url = db.Column(db.String(500), nullable=True)
     rating = db.Column(db.Integer, nullable=True)
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -41,6 +42,7 @@ class Book(db.Model):
             'status': self.status,
             'rating': self.rating,
             'notes': self.notes,
+            'cover_url': self.cover_url,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'reading_start_date': self.reading_start_date.isoformat() if self.reading_start_date else None,

@@ -51,6 +51,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="kpi-card goal-card">
+                <div class="kpi-icon bg-warning">
+                    <i class="bi bi-target"></i>
+                </div>
+                <div class="kpi-content">
+                    <h6 class="kpi-label">2026 Hedefi</h6>
+                    <p class="kpi-value" id="yearlyGoalBooks">0 / 30</p>
+                    <div class="goal-progress-bar">
+                        <div id="yearlyGoalBar" class="goal-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <small class="goal-percent" id="yearlyGoalPercent">0%</small>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Charts Section -->
@@ -133,6 +149,9 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Container for Book Notes -->
+<div id="noteModalContainer"></div>
 
 <!-- Toast Notification -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">

@@ -99,7 +99,8 @@ def create_book():
             read_pages=data.get('read_pages', 0),
             status=data.get('status', 'Okunacak'),
             rating=data.get('rating'),
-            notes=data.get('notes')
+            notes=data.get('notes'),
+            cover_url=data.get('cover_url')
         )
         
         db.session.add(book)
@@ -148,6 +149,7 @@ def update_book(book_id):
         book.status = data.get('status', book.status)
         book.rating = data.get('rating')
         book.notes = data.get('notes')
+        book.cover_url = data.get('cover_url')
         book.updated_at = datetime.utcnow()
         
         db.session.commit()
@@ -193,6 +195,31 @@ def update_book_progress(book_id):
         return jsonify({'error': True, 'message': 'Güncelleme başarısız oldu', 'code': 'SERVER_ERROR'}), 500
 
 
+@app.route('/api/books/<int:book_id>/notes', methods=['PUT'])
+def update_book_notes(book_id):
+    """Kitap notlarını güncelle"""
+    try:
+        book = Book.query.get(book_id)
+        if not book or book.is_archived:
+            return jsonify({'error': True, 'message': 'Kitap bulunamadı', 'code': 'NOT_FOUND'}), 404
+        
+        data = request.get_json()
+        notes = data.get('notes', '').strip() or None
+        
+        # Notes validasyonu
+        if notes and len(notes) > 1000:
+            return jsonify({'error': True, 'message': 'Not 1000 karakterden fazla olamaz', 'code': 'VALIDATION_ERROR'}), 400
+        
+        book.notes = notes
+        book.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify(book.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': True, 'message': 'Not güncellenirken hata oluştu', 'code': 'SERVER_ERROR'}), 500
+
+
 @app.route('/api/books/<int:book_id>', methods=['DELETE'])
 def delete_book(book_id):
     """Kitap silme (soft delete)"""
@@ -227,11 +254,18 @@ def get_stats():
         if total_books > 0:
             completion_percentage = round((books_finished / total_books) * 100, 1)
         
+        # Yıllık hedef (2026 için hedef 30 kitap)
+        yearly_goal = 30
+        yearly_goal_percentage = round((books_finished / yearly_goal) * 100, 1) if yearly_goal > 0 else 0
+        
         return jsonify({
             'total_books': total_books,
             'total_read_pages': total_read_pages,
             'books_reading': books_reading,
-            'completion_percentage': completion_percentage
+            'completion_percentage': completion_percentage,
+            'books_finished': books_finished,
+            'yearly_goal': yearly_goal,
+            'yearly_goal_percentage': yearly_goal_percentage
         }), 200
     except Exception as e:
         return jsonify({'error': True, 'message': 'İstatistikler alınamadı', 'code': 'SERVER_ERROR'}), 500
@@ -317,5 +351,5 @@ def internal_error(error):
 if __name__ == '__main__':
     init_db()
     print("✓ Veritabanı hazırlandı")
-    print("✓ Flask uygulaması başlatılıyor: http://localhost:5000")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    print("✓ Flask uygulaması başlatılıyor: http://localhost:5003")
+    app.run(debug=True, host='127.0.0.1', port=5003)

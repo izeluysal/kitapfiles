@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kitapfiles-web
+    ports:
+      - "5003:5003"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-this-secret-key}
+      DEBUG: ${DEBUG:-False}
+    volumes:
+      - ./data:/app/data
+      - ./instance:/app/instance
+    restart: unless-stopped
