@@ -7,8 +7,7 @@ import sys
 app = Flask(__name__)
 
 # Konfigürasyon
-import os
-db_path = os.path.abspath(os.path.join('data', 'app.db'))
+db_path = os.path.abspath(os.environ.get('DATABASE_PATH', os.path.join('data', 'app.db')))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -25,8 +24,11 @@ VALID_STATUSES = ['Okunuyor', 'Okunacak', 'Bitti']
 def init_db():
     """Veritabanını ve seed verisini başlat"""
     with app.app_context():
-        # data/ klasörünü oluştur
-        os.makedirs('data', exist_ok=True)
+        # DB dosyasının bulunduğu klasörü ve Flask instance klasörünü oluştur
+        db_dir = os.path.dirname(db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
+        os.makedirs(app.instance_path, exist_ok=True)
         
         # Veritabanı tablolarını oluştur
         db.create_all()
@@ -351,5 +353,5 @@ def internal_error(error):
 if __name__ == '__main__':
     init_db()
     print("✓ Veritabanı hazırlandı")
-    print("✓ Flask uygulaması başlatılıyor: http://localhost:5003")
-    app.run(debug=True, host='127.0.0.1', port=5003)
+    print("✓ Flask uygulaması başlatılıyor: http://localhost:5002")
+    app.run(debug=True, host='127.0.0.1', port=5002)

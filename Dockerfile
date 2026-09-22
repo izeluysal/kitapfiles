@@ -13,6 +13,6 @@ COPY . .
 
 RUN mkdir -p /app/data /app/instance
 
-EXPOSE 5003
+EXPOSE 5002
 
-CMD ["sh", "-c", "python -c \"from application import init_db; init_db()\" && gunicorn --bind 0.0.0.0:5003 --workers 2 application:app"]
+CMD ["sh", "-c", "python -c \"from application import init_db; init_db()\" && gunicorn --bind 0.0.0.0:5002 --workers 2 application:app"]
