@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- KPI Cards Section -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-sage-green">
+                    <i class="bi bi-book"></i>
+                </div>
+                <div class="kpi-content">
+                    <h6 class="kpi-label">Toplam Kitap</h6>
+                    <p class="kpi-value" id="totalBooks">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-stone-gray">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div class="kpi-content">
+                    <h6 class="kpi-label">Okunan Sayfa</h6>
+                    <p class="kpi-value" id="totalReadPages">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-navy">
+                    <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <h6 class="kpi-label">Şu An Okunan</h6>
+                    <p class="kpi-value" id="booksReading">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-sage-green">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="kpi-content">
+                    <h6 class="kpi-label">Tamamlanma %</h6>
+                    <p class="kpi-value" id="completionPercent">0%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="chart-card">
+                <h5 class="card-title mb-3">Türe Göre Dağılım</h5>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="chart-card">
+                <h5 class="card-title mb-3">Okuma Durumu Özeti</h5>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-card">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Kitap adı veya yazar ara...">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <select class="form-select" id="genreFilter">
+                            <option value="">Tüm Türler</option>
+                            <option value="Roman">Roman</option>
+                            <option value="Bilim">Bilim</option>
+                            <option value="Kişisel Gelişim">Kişisel Gelişim</option>
+                            <option value="Felsefe">Felsefe</option>
+                            <option value="Tarih">Tarih</option>
+                            <option value="Psikoloji">Psikoloji</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-pills mt-3">
+                    <button class="filter-pill active" data-status="">Tümü</button>
+                    <button class="filter-pill" data-status="Okunuyor">
+                        <i class="bi bi-play-fill me-1"></i>Okunuyor
+                    </button>
+                    <button class="filter-pill" data-status="Okunacak">
+                        <i class="bi bi-bookmark-fill me-1"></i>Okunacak
+                    </button>
+                    <button class="filter-pill" data-status="Bitti">
+                        <i class="bi bi-check-circle-fill me-1"></i>Bitti
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Grid Section -->
+    <div class="row" id="booksContainer">
+        <!-- Kitap kartları buraya dinamik olarak yüklenecek -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div id="emptyState" class="empty-state text-center py-5" style="display: none;">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: var(--sage-green);"></i>
+                <h5 class="mt-3">Kitap bulunamadı</h5>
+                <p class="text-muted">Kütüphanenizi oluşturmaya başlayın.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert">
+        <div class="toast-body bg-success text-white">
+            <i class="bi bi-check-circle me-2"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
